@@ -33,4 +33,18 @@ router.post('/put', function(req, res){
     
 });
 
+
+router.post('/delete', function(req, res){
+
+    console.log(req.body);
+    let obj = req.body;
+
+
+    table = table.filter(v => v.key !== obj.key);
+
+    res.send(table);
+    
+});
+
+
 module.exports = router;

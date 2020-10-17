@@ -2,9 +2,13 @@ const dotenv = require('dotenv');
 const express = require('express');
 const port = 5000;
 
+var cors = require('cors');
+
+
 var app = express();
 
 app.use(express.json());
+app.use(cors());
 
 
 app.all('/*', function(req, res, next){
