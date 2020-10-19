@@ -1,32 +1,33 @@
 const dotenv = require('dotenv');
 const express = require('express');
-const port = 5000;
+const morgan = require('morgan');
+const cors = require('cors');
 
-var cors = require('cors');
+// Load env variables
+dotenv.config({ path: './config/.env' });
 
+let app = express();
 
-var app = express();
+// * Middleware
 
 app.use(express.json());
 app.use(cors());
 
+// Logging
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+}
 
-app.all('/*', function(req, res, next){
-
+// Routes
+app.all('/*', (req, res, next) => {
     console.log(`REQUEST, from ${req.ip}; path ${req.path} `);
     next();
-
-})
-
-app.use('/skeleton', require('./routes/skeleton'));
-
-
-var server = app.listen(port, function () {
-    var host = server.address().address;
-    var port = server.address().port;
-    console.log('backend listening at http://%s:%s', host, port);
-    //console.log('possible paths : ');
-    //console.log(app._router.stack.map(l => (l && l.route && l.route.path) ? l.route.path : null).filter(p => p !== null));
 });
 
-
+// Server start
+const port = process.env.PORT;
+let server = app.listen(port, () => {
+    let host = server.address().address;
+    let port = server.address().port;
+    console.log('backend listening at http://%s:%s', host, port);
+});
