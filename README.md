@@ -11,10 +11,6 @@ Backend for trello like web application.
 
 ## Launch
 
-### Heroku
-
-Go to: http://pki-final.herokuapp.com/
-
 ### Local
 
 In order to run this app localy you will need couple of things:
