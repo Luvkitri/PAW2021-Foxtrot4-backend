@@ -24,6 +24,8 @@ app.all('/*', (req, res, next) => {
     next();
 });
 
+app.use('/skeleton', require('./routes/skeleton'));
+
 // Server start
 const port = process.env.PORT;
 let server = app.listen(port, () => {
