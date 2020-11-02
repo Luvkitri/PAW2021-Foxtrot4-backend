@@ -21,10 +21,21 @@ router.post('/register', async (req, res) => {
     try {
         let data = JSON.parse(JSON.stringify(req.body));
         data.password= await bcrypt.hash(req.body.password, 10);
+
+        const user = await User.findOne({
+            where: {
+                login: req.body.login
+            }
+        });
+        if(user){
+            res.status(403).json('Already exists');
+            return;
+        }
+
         const newEntry = User.build(data);
         await newEntry.save();
 
-        res.status(201).json('OK');
+        res.status(201).json(true);
     } catch (error) {
         console.error(error.message);
         res.status(500).json(error.message);
