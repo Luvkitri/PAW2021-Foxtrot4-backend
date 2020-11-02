@@ -84,10 +84,10 @@ router.post('/login', async (req, res) => {
         });
         const username= { name:user.login};
         if(await bcrypt.compare(req.body.password, user.password)){
-            const accessToken = jwt.sign(username, process.env.ACCESS_TOKEN_SECRET);
-            res.json({accessToken: accessToken});
+            const accessToken = jwt.sign({user:user}, process.env.ACCESS_TOKEN_SECRET);
+            res.status(200).json({accessToken: accessToken});
         }else{
-            res.send("Failed");
+            res.status(403).send("Failed");
         }
 
     } catch (error) {
