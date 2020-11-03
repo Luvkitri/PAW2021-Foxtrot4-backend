@@ -8,6 +8,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const user = require("../models/user");
 
+const functions = require('../functions');
+const authenticateToken = functions.authenticateToken;
 
 // @desc    Welcome message
 // @route   GET /auth/
@@ -59,18 +61,6 @@ router.get('/get', authenticateToken, async (req, res) => {
     }
 });
 
-function authenticateToken(req, res, next){
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if(token == null) return res.sendStatus(401)
-
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        if(err) return res.sendStatus(403)
-        req.user = user
-        next();
-    })
-    
-}
 
 let refreshTokens = []
 router.post('/token', (req, res) =>{
@@ -120,7 +110,7 @@ router.post('/login', async (req, res) => {
 });
 
 function generateAccessToken(user){
-    return accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'15s'});
+    return accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'9999999s'});
 }
 
 module.exports = router;

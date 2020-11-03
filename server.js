@@ -2,7 +2,8 @@ const dotenv = require('dotenv');
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
-
+const functions = require('./functions');
+const authenticateToken = functions.authenticateToken;
 
 
 // Load env variables
@@ -27,7 +28,7 @@ app.all('/*', (req, res, next) => {
     next();
 });
 
-app.use('/skeleton', require('./routes/skeleton'));
+app.use('/skeleton', authenticateToken, require('./routes/skeleton'));
 app.use('/auth', require('./routes/auth'));
 
 // Server start
