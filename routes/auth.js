@@ -88,6 +88,11 @@ router.post('/token', (req, res) =>{
     })
 })
 
+router.post('/logout', (req, res) =>{
+   refreshTokens = refreshTokens.filter(token => token !== req.body.token)
+   res.sendStatus(204)
+})
+
 // @desc    Autheticate user
 // @route   POST /auth/login
 router.post('/login', async (req, res) => {
