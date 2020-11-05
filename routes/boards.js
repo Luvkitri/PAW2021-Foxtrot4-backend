@@ -39,3 +39,29 @@ router.get('/', async (req, res) => {
     }
 });
 
+// @desc Add new board
+// @route POST /boards/add
+router.post('/add', async (req, res) => {
+    try {
+        let boardData = req.body;
+        
+        const newBoard = models.Board.build(boardData);
+        await newBoard.save();
+
+        let relationData = {
+            user_id: 1,
+            board_id: newBoard.id,
+            read: true,
+            write: true,
+            execute: true
+        }
+
+        const newRelation = models.UserBoardRelation.build(relationData);
+        await newRelation.save();
+
+        res.status(201).json("Board added");
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json(error.message);
+    }
+});
