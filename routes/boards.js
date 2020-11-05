@@ -85,3 +85,23 @@ router.post('/archive', async (req, res) => {
     }
 });
 
+//@desc Restore a board from archived state
+//@route POST /boards/restore
+router.post('/restore', async (req, res) => {
+    try {
+        let boardId = req.body.id;
+
+        await models.Board.update({ archived: false }, {
+            where: {
+                id: boardId
+            }
+        });
+
+        res.status(201).json("Board restored");
+    } catch(error) {
+        console.error(error.message);
+        res.status(500).json(error.message);
+    }
+})
+
+module.exports = router;
