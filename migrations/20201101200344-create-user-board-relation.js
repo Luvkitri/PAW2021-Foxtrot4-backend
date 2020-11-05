@@ -15,7 +15,8 @@ module.exports = {
                 primaryKey: true,
                 references: {
                     model: 'user',
-                    key: 'id'
+                    key: 'id',
+                    as: 'user_id'
                 }
             },
             board_id: {
@@ -24,15 +25,22 @@ module.exports = {
                 primaryKey: true,
                 references: {
                     model: 'board',
-                    key: 'id'
+                    key: 'id',
+                    as: 'board_id'
                 }
             },
-            permission: {
-                type: Sequelize.STRING,
+            read: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false
+            },
+            write: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false
+            },
+            execute: {
+                type: Sequelize.BOOLEAN,
                 allowNull: false
             }
-        }, {
-            logging: console.log
         });
     },
 

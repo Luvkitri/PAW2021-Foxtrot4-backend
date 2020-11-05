@@ -36,10 +36,7 @@ module.exports = {
                     key: 'id'
                 }
             }
-        }, {
-            logging: console.log
-        }
-        );
+        });
     },
 
     down: async (queryInterface, Sequelize) => {

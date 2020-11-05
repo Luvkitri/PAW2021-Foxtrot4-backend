@@ -16,24 +16,33 @@ module.exports = {
                 type: Sequelize.INTEGER
             },
             first_name: {
-                type: Sequelize.STRING
+                type: Sequelize.STRING,
+                allowNull: false
             },
             last_name: {
-                type: Sequelize.STRING
+                type: Sequelize.STRING,
+                allowNull: false
             },
             email: {
-                type: Sequelize.STRING
+                type: Sequelize.STRING,
+                allowNull: false
+            },
+            login: {
+                type: Sequelize.STRING,
+                allowNull: false
+            },
+            password: {
+                type: Sequelize.STRING,
+                allowNull: false
             },
             created_at: {
-                allowNull: false,
-                type: Sequelize.DATE
+                type: Sequelize.DATE,
+                allowNull: false
             },
             updated_at: {
-                allowNull: false,
-                type: Sequelize.DATE
+                type: Sequelize.DATE,
+                allowNull: false
             }
-        }, {
-            logging: console.log
         });
     },
 

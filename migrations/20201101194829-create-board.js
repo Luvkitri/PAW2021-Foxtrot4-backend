@@ -32,8 +32,6 @@ module.exports = {
                 allowNull: false,
                 defaultValue: false
             }
-        }, {
-            logging: console.log
         });
     },
 
