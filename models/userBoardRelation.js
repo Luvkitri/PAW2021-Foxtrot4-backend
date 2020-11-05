@@ -20,7 +20,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             references: {
                 model: 'User',
-                key: 'id'
+                key: 'id',
+                as: 'user_id'
             }
         },
         board_id: {
@@ -28,12 +29,21 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             references: {
                 model: 'Board',
-                key: 'id'
+                key: 'id',
+                as: 'board_id'
             }
         },
-        permissions: {
-            type: DataTypes.STRING,
-            allowNull: false,
+        read: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false
+        },
+        write: { 
+            type: DataTypes.BOOLEAN,
+            allowNull: false
+        },
+        execute: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false
         }
     }, {
         sequelize,
