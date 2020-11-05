@@ -65,3 +65,23 @@ router.post('/add', async (req, res) => {
         res.status(500).json(error.message);
     }
 });
+
+//@desc Archive a board
+//@route POST /boards/archive
+router.post('/archive', async (req, res) => {
+    try {
+        let boardId = req.body.id;
+        
+        await models.Board.update({ archived: true }, {
+            where: {
+                id: boardId
+            }
+        });
+
+        res.status(201).json("Board archived");
+    } catch(error) {
+        console.error(error.message);
+        res.status(500).json(error.message);
+    }
+});
+
