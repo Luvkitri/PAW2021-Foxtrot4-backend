@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const lists = require('./lists');
 const models = require('../models');
 
 // @desc Get all the boards
@@ -11,12 +12,12 @@ router.get('/', async (req, res) => {
             include: [{
                 model: models.User,
                 as: 'UsersInBoard',
-                where: { id: 1}
+                where: { id: 1 }
             }]
         });
-    
+
         let boards = [];
-    
+
         results.forEach(result => {
             let board = {
                 id: result.id,
@@ -26,16 +27,27 @@ router.get('/', async (req, res) => {
                 archived: result.archived,
                 read: result['UsersInBoard.UserBoardRelation.read'],
                 write: result['UsersInBoard.UserBoardRelation.write'],
-                execute:result['UsersInBoard.UserBoardRelation.execute']
+                execute: result['UsersInBoard.UserBoardRelation.execute']
             }
-    
+
             boards.push(board);
         });
-    
+
         res.status(201).json(boards);
-    } catch(error) {
+    } catch (error) {
         console.error(error.message);
-        res.status(500).json(error.message);
+        res.status(500).send(error.message);
+    }
+});
+
+// @desc Opening a board based on ID
+// @route GET /boards/:boardId
+router.get('/:boardId', async (req, res) => {
+    try {
+        // TODO
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send(error.message);
     }
 });
 
@@ -44,7 +56,7 @@ router.get('/', async (req, res) => {
 router.post('/add', async (req, res) => {
     try {
         let boardData = req.body;
-        
+
         const newBoard = models.Board.build(boardData);
         await newBoard.save();
 
@@ -59,10 +71,10 @@ router.post('/add', async (req, res) => {
         const newRelation = models.UserBoardRelation.build(relationData);
         await newRelation.save();
 
-        res.status(201).json("Board added");
+        res.status(201).send("Board added");
     } catch (error) {
         console.error(error.message);
-        res.status(500).json(error.message);
+        res.status(500).send(error.message);
     }
 });
 
@@ -71,17 +83,17 @@ router.post('/add', async (req, res) => {
 router.post('/archive', async (req, res) => {
     try {
         let boardId = req.body.id;
-        
+
         await models.Board.update({ archived: true }, {
             where: {
                 id: boardId
             }
         });
 
-        res.status(201).json("Board archived");
-    } catch(error) {
+        res.status(201).send("Board archived");
+    } catch (error) {
         console.error(error.message);
-        res.status(500).json(error.message);
+        res.status(500).send(error.message);
     }
 });
 
@@ -97,10 +109,10 @@ router.post('/restore', async (req, res) => {
             }
         });
 
-        res.status(201).json("Board restored");
-    } catch(error) {
+        res.status(201).send("Board restored");
+    } catch (error) {
         console.error(error.message);
-        res.status(500).json(error.message);
+        res.status(500).send(error.message);
     }
 })
 
