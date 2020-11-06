@@ -72,6 +72,7 @@ router.post('/add', async (req, res) => {
         await newRelation.save();
 
         res.status(201).send("Board added");
+        res.status(201).json(newBoard);
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
