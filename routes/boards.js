@@ -12,7 +12,9 @@ router.get('/', async (req, res) => {
             include: [{
                 model: models.User,
                 as: 'UsersInBoard',
-                where: { id: 1 }
+                where: {
+                    id: 1
+                }
             }]
         });
 
@@ -33,7 +35,7 @@ router.get('/', async (req, res) => {
             boards.push(board);
         });
 
-        res.status(201).json(boards);
+        res.status(200).json(boards);
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
@@ -45,6 +47,7 @@ router.get('/', async (req, res) => {
 router.get('/:boardId', async (req, res) => {
     try {
         // TODO
+        
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
@@ -93,7 +96,7 @@ router.post('/archive', async (req, res) => {
             }
         });
 
-        res.status(201).send("Board archived");
+        res.status(200).send({ result:true, msg: "Board archived" });
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
@@ -115,7 +118,7 @@ router.post('/restore', async (req, res) => {
             }
         });
 
-        res.status(201).send("Board restored");
+        res.status(200).send({ result:true, msg: "Board restored" });
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
