@@ -71,7 +71,6 @@ router.post('/add', async (req, res) => {
         const newRelation = models.UserBoardRelation.build(relationData);
         await newRelation.save();
 
-        res.status(201).send("Board added");
         res.status(201).json(newBoard);
     } catch (error) {
         console.error(error.message);
@@ -82,10 +81,13 @@ router.post('/add', async (req, res) => {
 //@desc Archive a board
 //@route POST /boards/archive
 router.post('/archive', async (req, res) => {
+    //TODO: check if user has acces to perform operation
     try {
         let boardId = req.body.id;
 
-        await models.Board.update({ archived: true }, {
+        await models.Board.update({
+            archived: true
+        }, {
             where: {
                 id: boardId
             }
@@ -101,10 +103,13 @@ router.post('/archive', async (req, res) => {
 //@desc Restore a board from archived state
 //@route POST /boards/restore
 router.post('/restore', async (req, res) => {
+    //TODO: check if user has acces to perform operation
     try {
         let boardId = req.body.id;
 
-        await models.Board.update({ archived: false }, {
+        await models.Board.update({
+            archived: false
+        }, {
             where: {
                 id: boardId
             }
@@ -116,5 +121,8 @@ router.post('/restore', async (req, res) => {
         res.status(500).send(error.message);
     }
 })
+
+//TODO: DELETE request
+
 
 module.exports = router;
