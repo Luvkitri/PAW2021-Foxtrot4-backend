@@ -7,7 +7,9 @@ const authenticateToken = functions.authenticateToken;
 
 
 // Load env variables
-dotenv.config({ path: './config/.env' });
+dotenv.config({
+    path: './config/.env'
+});
 
 let app = express();
 
@@ -28,8 +30,8 @@ app.all('/*', (req, res, next) => {
     next();
 });
 
-app.use('/skeleton', authenticateToken, require('./routes/skeleton'));
 app.use('/auth', require('./routes/auth'));
+app.use('/boards', require('./routes/boards'));
 
 // Server start
 const port = process.env.PORT;

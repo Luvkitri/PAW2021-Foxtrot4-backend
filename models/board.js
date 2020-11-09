@@ -2,51 +2,50 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class User extends Model {
+    class Board extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            User.belongsToMany(models.Board, {
-                as: 'BoardsInUser',
+            Board.belongsToMany(models.User, { 
+                as: 'UsersInBoard',
                 through: models.UserBoardRelation,
-                foreignKey: 'user_id',
-                otherKey: 'board_id'
+                foreignKey: 'board_id',
+                otherKey: 'user_id'
+            });
+
+            Board.hasMany(models.List, {
+                foreignKey: 'board_id'
             });
         }
     };
 
-    User.init({
-        first_name: {
+    Board.init({
+        board_name: {
             type: DataTypes.STRING,
             allowNull: false
         },
-        last_name: {
+        last_open: {
+            type: DataTypes.DATE
+        },
+        visibility: {
             type: DataTypes.STRING,
             allowNull: false
         },
-        email: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        login: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        password: {
-            type: DataTypes.STRING,
-            allowNull: false
+        archived: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         }
     }, {
         sequelize,
-        modelName: 'User',
-        tableName: 'user',
-        updatedAt: 'updated_at',
-        createdAt: 'created_at',
+        modelName: 'Board',
+        tableName: 'board',
+        timestamps: false,
         underscored: true
     });
 
-    return User;
+    return Board;
 };
