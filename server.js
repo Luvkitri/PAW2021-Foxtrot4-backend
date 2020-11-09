@@ -2,9 +2,14 @@ const dotenv = require('dotenv');
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const functions = require('./functions');
+const authenticateToken = functions.authenticateToken;
+
 
 // Load env variables
-dotenv.config({ path: './config/.env' });
+dotenv.config({
+    path: './config/.env'
+});
 
 let app = express();
 
@@ -12,6 +17,7 @@ let app = express();
 
 app.use(express.json());
 app.use(cors());
+
 
 // Logging
 if (process.env.NODE_ENV === 'development') {
@@ -24,7 +30,7 @@ app.all('/*', (req, res, next) => {
     next();
 });
 
-app.use('/skeleton', require('./routes/skeleton'));
+app.use('/auth', require('./routes/auth'));
 app.use('/boards', require('./routes/boards'));
 
 // Server start
