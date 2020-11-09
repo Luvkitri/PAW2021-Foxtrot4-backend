@@ -46,8 +46,8 @@ router.get('/', async (req, res) => {
 // @route GET /boards/:boardId
 router.get('/:boardId', async (req, res) => {
     try {
-        // TODO
-        
+        const results = await models.Board.findByPk(req.params.boardId);
+        res.status(200).json(results.dataValues);
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
@@ -127,5 +127,10 @@ router.post('/restore', async (req, res) => {
 
 //TODO: DELETE request
 
+
+router.use('/:boardId/lists', (req, res, next) => {
+    req.boardId = req.params.boardId;
+    next();
+}, lists);
 
 module.exports = router;
