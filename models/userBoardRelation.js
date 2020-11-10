@@ -9,8 +9,12 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            UserBoardRelation.belongsTo(models.User);
-            UserBoardRelation.belongsTo(models.Board);
+            UserBoardRelation.belongsTo(models.User, {
+                onDelete: 'CASCADE'
+            });
+            UserBoardRelation.belongsTo(models.Board, {
+                onDelete: 'CASCADE'
+            });
         }
     };
 

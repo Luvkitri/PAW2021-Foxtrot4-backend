@@ -17,7 +17,8 @@ module.exports = (sequelize, DataTypes) => {
             });
 
             Board.hasMany(models.List, {
-                foreignKey: 'board_id'
+                foreignKey: 'board_id',
+                onDelete: 'CASCADE'
             });
         }
     };

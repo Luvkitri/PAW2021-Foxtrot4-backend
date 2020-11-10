@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             List.belongsTo(models.Board);
             List.hasMany(models.Card, {
-                foreignKey: 'list_id'
+                foreignKey: 'list_id',
+                onDelete: 'CASCADE'
             });
         }
     };
