@@ -3,7 +3,6 @@ require("dotenv").config();
 const express = require('express');
 const router = express.Router();
 const models = require('../models');
-const User = models.user;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const user = require("../models/user");
@@ -24,7 +23,7 @@ router.post('/register', async (req, res) => {
         let data = JSON.parse(JSON.stringify(req.body));
         data.password = await bcrypt.hash(req.body.password, 10);
 
-        const user = await User.findOne({
+        const user = await models.User.findOne({
             where: {
                 login: req.body.login
             }
@@ -34,7 +33,7 @@ router.post('/register', async (req, res) => {
             return;
         }
 
-        const newEntry = User.build(data);
+        const newEntry = models.User.build(data);
         await newEntry.save();
 
         res.status(201).json(true);
@@ -49,7 +48,7 @@ router.post('/register', async (req, res) => {
 router.get('/get', authenticateToken, async (req, res) => {
     console.log("sssad");
     try {
-        const user = await User.findOne({
+        const user = await models.User.findOne({
             where: {
                 login: req.user.user.login
             }
@@ -73,8 +72,12 @@ router.post('/token', (req, res) => {
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
         if (err) return res.sendStatus(403)
         console.log(user)
-        const accessToken = generateAccessToken({ user: user.user })
-        res.json({ accessToken: accessToken });
+        const accessToken = generateAccessToken({
+            user: user.user
+        })
+        res.json({
+            accessToken: accessToken
+        });
     })
 })
 
@@ -88,17 +91,24 @@ router.post('/logout', (req, res) => {
 router.post('/login', async (req, res) => {
     try {
 
-        const user = await User.findOne({
+        const user = await models.User.findOne({
             where: {
                 login: req.body.login
             }
         });
 
         if (await bcrypt.compare(req.body.password, user.password)) {
-            const accessToken = generateAccessToken({ user: user });
-            const refreshToken = jwt.sign({ user: user }, process.env.REFRESH_TOKEN_SECRET)
+            const accessToken = generateAccessToken({
+                user: user
+            });
+            const refreshToken = jwt.sign({
+                user: user
+            }, process.env.REFRESH_TOKEN_SECRET)
             refreshTokens.push(refreshToken);
-            res.status(200).json({ accessToken: accessToken, refreshToken: refreshToken });
+            res.status(200).json({
+                accessToken: accessToken,
+                refreshToken: refreshToken
+            });
         } else {
             res.status(403).send("Failed");
         }
@@ -110,7 +120,9 @@ router.post('/login', async (req, res) => {
 });
 
 function generateAccessToken(user) {
-    return accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '9999999s' });
+    return accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: '9999999s'
+    });
 }
 
 module.exports = router;

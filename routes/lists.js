@@ -68,7 +68,9 @@ router.delete('/:listId', async (req, res) => {
             }
         });
 
-        res.status(200).send({ result: true });
+        res.status(200).send({
+            result: true
+        });
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
@@ -81,7 +83,14 @@ router.delete('/:listId', async (req, res) => {
 router.post('/add', async (req, res) => {
     try {
         const listData = req.body;
+        // if board_id not specified in request body, but given in url
+        if (!listData.board_id && req.boardId) {
+            listData.board_id = req.boardId;
+        }
 
+        //(maybe) TODO: automatic listData.position if not specified, 
+        //              equal to number of lists in given board + 1
+        //              or some arbitrary number, like 99999 so initialy it will always be last
         const newList = models.List.build(listData);
         await newList.save();
 
@@ -106,7 +115,12 @@ router.post('/archive', async (req, res) => {
             }
         });
 
-        res.status(200).send({ result: true });
+        //(maybe) TODO: check number of affected rows, in case of invalid id
+
+        //(maybe) TODO: return changed list object
+        res.status(200).send({
+            result: true
+        });
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
@@ -127,7 +141,13 @@ router.post('/restore', async (req, res) => {
             }
         });
 
-        res.status(200).send({ result: true });
+        //(maybe) TODO: check number of affected rows, in case of invalid id
+
+        //(maybe) TODO: return changed list object
+
+        res.status(200).send({
+            result: true
+        });
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);

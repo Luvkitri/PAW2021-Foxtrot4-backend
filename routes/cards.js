@@ -62,6 +62,7 @@ router.get('/:cardId', async (req, res) => {
 // @desc Get card by id
 // @route DELETE /boards/:boardId/lists/:listId/cards/:cardId
 router.delete('/:cardId', async (req, res) => {
+    //TODO: check if card is archived, if not then refuse action
     try {
         await models.Card.destroy({
             where: {
@@ -69,7 +70,9 @@ router.delete('/:cardId', async (req, res) => {
             }
         });
 
-        res.status(200).send({ result: true });
+        res.status(200).send({
+            result: true
+        });
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
@@ -81,8 +84,10 @@ router.delete('/:cardId', async (req, res) => {
 router.post('/add', async (req, res) => {
     try {
         const cardData = req.body;
-
-        console.log(cardData);
+        // if board_id not specified in request body, but given in url
+        if (!cardData.list_id && req.listId) {
+            cardData.list_id = req.listId;
+        }
 
         const newCard = models.Card.build(cardData);
         await newCard.save();
@@ -108,7 +113,9 @@ router.post('/archive', async (req, res) => {
             }
         });
 
-        res.status(200).send({ result: true });
+        res.status(200).send({
+            result: true
+        });
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
@@ -129,7 +136,9 @@ router.post('/restore', async (req, res) => {
             }
         });
 
-        res.status(200).send({ result: true });
+        res.status(200).send({
+            result: true
+        });
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);

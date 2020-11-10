@@ -5,7 +5,8 @@
     "main": "server.js",
     "scripts": {
         "start": "node server",
-        "dev": "nodemon server"
+        "dev": "nodemon server",
+        "rebuild-db" : "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate"
     },
     "repository": {
         "type": "git",
