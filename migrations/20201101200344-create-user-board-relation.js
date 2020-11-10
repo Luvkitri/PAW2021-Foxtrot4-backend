@@ -17,7 +17,8 @@ module.exports = {
                     model: 'user',
                     key: 'id',
                     as: 'user_id'
-                }
+                },
+                onDelete: 'cascade'
             },
             board_id: {
                 type: Sequelize.INTEGER,
@@ -27,7 +28,8 @@ module.exports = {
                     model: 'board',
                     key: 'id',
                     as: 'board_id'
-                }
+                },
+                onDelete: 'cascade'
             },
             read: {
                 type: Sequelize.BOOLEAN,

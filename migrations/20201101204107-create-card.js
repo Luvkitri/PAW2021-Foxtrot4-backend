@@ -19,6 +19,10 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false
             },
+            position: {
+                type: Sequelize.INTEGER,
+                allowNull: false
+            },
             content: {
                 type: Sequelize.STRING,
                 allowNull: false
