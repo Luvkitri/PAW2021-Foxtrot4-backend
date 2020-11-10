@@ -1,70 +1,71 @@
 const express = require('express');
 const router = express.Router();
-const cards = require('./cards');
 const models = require('../models');
 
-// @desc Get all the lists for current board 
-// @route GET /boards/:boardId/lists
+// @desc Get all the cards
+// @route GET /boards/:boardId/lists/:listId/cards
 router.get('/', async (req, res) => {
     try {
-        const results = await models.List.findAll({
+        const results = await models.Card.findAll({
             raw: true,
             include: [{
-                model: models.Board,
+                model: models.List,
                 where: {
-                    id: req.boardId
+                    id: req.listId
                 }
             }]
         });
 
-        let lists = []
+        let cards = [];
 
         results.forEach(result => {
-            let list = {
+            let card = {
                 id: result.id,
-                list_name: result.list_name,
+                card_name: result.card_name,
                 position: result.position,
-                archived: result.archived,
+                content: result.content,
+                archived: result.archived
             }
 
-            lists.push(list);
+            cards.push(card);
         });
 
-        res.status(200).json(lists);
+        res.status(200).json(cards);
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
     }
 });
 
-// @desc Get list by id 
-// @route GET /boards/:boardId/lists/:listId
-router.get('/:listId', async (req, res) => {
+// @desc Get card by id
+// @route GET /boards/:boardId/lists/:listId/cards/:cardId
+router.get('/:cardId', async (req, res) => {
     try {
-        const results = await models.List.findByPk(req.params.listId);
+        const results = await models.Card.findByPk(req.params.cardId);
 
-        let list = {
+        let card = {
             id: results.id,
-            list_name: results.list_name,
+            card_name: results.card_name,
             position: results.position,
+            content: results.content,
             archived: results.archived,
-            board_id: results.board_id
+            list_id: results.list_id
         }
 
-        res.status(200).json(list);
+        res.status(200).json(card);
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
     }
 });
 
-// @desc Delete list by id
-// @route DELETE /boards/:boardId/lists/:listId
-router.delete('/:listId', async (req, res) => {
+// @desc Get card by id
+// @route DELETE /boards/:boardId/lists/:listId/cards/:cardId
+router.delete('/:cardId', async (req, res) => {
     try {
-        await models.List.destroy({
+        await models.Card.destroy({
             where: {
-                id: req.params.listId
+                id: req.params.cardId
             }
         });
 
@@ -73,36 +74,37 @@ router.delete('/:listId', async (req, res) => {
         console.error(error.message);
         res.status(500).send(error.message);
     }
-})
+});
 
-
-// @desc Add list to board
-// @route POST /boards/:boardId/lists/add
+// @desc Add card to list
+// @route POST /boards/:boardId/lists/:listId/cards/add
 router.post('/add', async (req, res) => {
     try {
-        const listData = req.body;
+        const cardData = req.body;
 
-        const newList = models.List.build(listData);
-        await newList.save();
+        console.log(cardData);
 
-        res.status(201).json(newList);
+        const newCard = models.Card.build(cardData);
+        await newCard.save();
+
+        res.status(201).json(newCard);
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
     }
 });
 
-// @desc Archive list by Id
-// @route POST /boards/:boardId/lists/archive
+// @desc Archive card by id
+// @route POST /boards/:boardId/lists/:listId/cards/archive
 router.post('/archive', async (req, res) => {
     try {
-        let listId = req.body.id;
+        let cardId = req.body.id;
 
-        await models.List.update({
+        await models.Card.update({
             archived: true
         }, {
             where: {
-                id: listId
+                id: cardId
             }
         });
 
@@ -113,17 +115,17 @@ router.post('/archive', async (req, res) => {
     }
 });
 
-// @desc Restore archived list
-// @route POST /boards/:boardId/lists/restore
+// @desc Restore card by id
+// @route POST /boards/:boardId/lists/:listId/cards/restore
 router.post('/restore', async (req, res) => {
     try {
-        let listId = req.body.id;
+        let cardId = req.body.id;
 
-        await models.List.update({
+        await models.Card.update({
             archived: false
         }, {
             where: {
-                id: listId
+                id: cardId
             }
         });
 
@@ -133,11 +135,5 @@ router.post('/restore', async (req, res) => {
         res.status(500).send(error.message);
     }
 });
-
-router.use('/:listId/cards', (req, res, next) => {
-    req.listId = req.params.listId;
-    next();
-}, cards);
-
 
 module.exports = router;

@@ -4,7 +4,7 @@ const lists = require('./lists');
 const models = require('../models');
 
 // @desc Get all the boards
-// @router GET /boards/
+// @route GET /boards/
 router.get('/', async (req, res) => {
     try {
         const results = await models.Board.findAll({
@@ -54,6 +54,23 @@ router.get('/:boardId', async (req, res) => {
     }
 });
 
+// @desc Delete board by id
+// @route DELETE /boards/:boardId
+router.delete('/:boardId', async (req, res) => {
+    try {
+        await models.Board.destroy({
+            where: {
+                id: req.params.boardId
+            }
+        });
+
+        res.status(200).send({ result: true });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send(error.message);
+    }
+})
+
 // @desc Add new board
 // @route POST /boards/add
 router.post('/add', async (req, res) => {
@@ -81,8 +98,8 @@ router.post('/add', async (req, res) => {
     }
 });
 
-//@desc Archive a board
-//@route POST /boards/archive
+// @desc Archive a board
+// @route POST /boards/archive
 router.post('/archive', async (req, res) => {
     //TODO: check if user has acces to perform operation
     try {
@@ -96,15 +113,15 @@ router.post('/archive', async (req, res) => {
             }
         });
 
-        res.status(200).send({ result:true, msg: "Board archived" });
+        res.status(200).send({ result: true });
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
     }
 });
 
-//@desc Restore a board from archived state
-//@route POST /boards/restore
+// @desc Restore a board from archived state
+// @route POST /boards/restore
 router.post('/restore', async (req, res) => {
     //TODO: check if user has acces to perform operation
     try {
@@ -118,14 +135,14 @@ router.post('/restore', async (req, res) => {
             }
         });
 
-        res.status(200).send({ result:true, msg: "Board restored" });
+        res.status(200).send({ result: true });
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
     }
 })
 
-//TODO: DELETE request
+
 
 
 router.use('/:boardId/lists', (req, res, next) => {

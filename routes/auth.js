@@ -22,14 +22,14 @@ router.get('/', (req, res) => {
 router.post('/register', async (req, res) => {
     try {
         let data = JSON.parse(JSON.stringify(req.body));
-        data.password= await bcrypt.hash(req.body.password, 10);
+        data.password = await bcrypt.hash(req.body.password, 10);
 
         const user = await User.findOne({
             where: {
                 login: req.body.login
             }
         });
-        if(user){
+        if (user) {
             res.status(403).json('Already exists');
             return;
         }
@@ -63,43 +63,43 @@ router.get('/get', authenticateToken, async (req, res) => {
 
 
 let refreshTokens = []
-router.post('/token', (req, res) =>{
+router.post('/token', (req, res) => {
     const refreshToken = req.body.token;
-    if(refreshToken == null) return res.sendStatus(401);
-    if(!refreshTokens.includes(refreshToken)) {
+    if (refreshToken == null) return res.sendStatus(401);
+    if (!refreshTokens.includes(refreshToken)) {
         console.log("there is no specified refresh token stored")
         return res.sendStatus(403);
     }
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user)=>{
-        if(err) return res.sendStatus(403)
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403)
         console.log(user)
-        const accessToken = generateAccessToken({user:user.user})
-        res.json({accessToken: accessToken});
+        const accessToken = generateAccessToken({ user: user.user })
+        res.json({ accessToken: accessToken });
     })
 })
 
-router.post('/logout', (req, res) =>{
-   refreshTokens = refreshTokens.filter(token => token !== req.body.token)
-   res.sendStatus(204)
+router.post('/logout', (req, res) => {
+    refreshTokens = refreshTokens.filter(token => token !== req.body.token)
+    res.sendStatus(204)
 })
 
 // @desc    Autheticate user
 // @route   POST /auth/login
 router.post('/login', async (req, res) => {
     try {
-        
+
         const user = await User.findOne({
             where: {
                 login: req.body.login
             }
         });
 
-        if(await bcrypt.compare(req.body.password, user.password)){
-            const accessToken = generateAccessToken({user:user});
-            const refreshToken = jwt.sign({user:user}, process.env.REFRESH_TOKEN_SECRET)
+        if (await bcrypt.compare(req.body.password, user.password)) {
+            const accessToken = generateAccessToken({ user: user });
+            const refreshToken = jwt.sign({ user: user }, process.env.REFRESH_TOKEN_SECRET)
             refreshTokens.push(refreshToken);
-            res.status(200).json({accessToken: accessToken, refreshToken: refreshToken});
-        }else{
+            res.status(200).json({ accessToken: accessToken, refreshToken: refreshToken });
+        } else {
             res.status(403).send("Failed");
         }
 
@@ -109,8 +109,8 @@ router.post('/login', async (req, res) => {
     }
 });
 
-function generateAccessToken(user){
-    return accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'9999999s'});
+function generateAccessToken(user) {
+    return accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '9999999s' });
 }
 
 module.exports = router;
