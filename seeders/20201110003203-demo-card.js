@@ -12,31 +12,36 @@ module.exports = {
          * }], {});
         */
 
-        await queryInterface.bulkInsert('list', [
+        await queryInterface.bulkInsert('card', [
             {
-                list_name: 'list1',
+                card_name: 'card1',
+                content: 'content1',
                 position: 1,
-                board_id: 1
+                list_id: 1
             },
             {
-                list_name: 'list2',
+                card_name: 'card2',
+                content: 'content2',
                 position: 2,
-                board_id: 1
+                list_id: 1
             },
             {
-                list_name: 'list3',
+                card_name: 'card3',
+                content: 'content3',
                 position: 3,
-                board_id: 1
+                list_id: 1
             },
             {
-                list_name: 'list4',
+                card_name: 'card4',
+                content: 'content4',
                 position: 4,
-                board_id: 1
+                list_id: 2
             },
             {
-                list_name: 'list5',
+                card_name: 'card5',
+                content: 'content5',
                 position: 5,
-                board_id: 1
+                list_id: 2
             }
         ])
     },
@@ -48,7 +53,7 @@ module.exports = {
          * Example:
          * await queryInterface.bulkDelete('People', null, {});
          */
-        await queryInterface.bulkDelete('list', null, {
+        await queryInterface.bulkDelete('card', null, {
             truncate: true,
             cascade: true,
             restartIdentity: true
