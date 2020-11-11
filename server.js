@@ -37,7 +37,7 @@ app.use('/boards', authenticateToken, require('./routes/boards'));
 // Server start
 //const port = process.env.PORT;
 
-const port = 80;
+const port = 8080;
 
 let server = app.listen(port, () => {
     let host = server.address().address;
