@@ -88,9 +88,10 @@ router.post('/add', async (req, res) => {
             listData.board_id = req.boardId;
         }
 
-        //(maybe) TODO: automatic listData.position if not specified, 
+        /**  TODO: automatic listData.position if not specified, 
         //              equal to number of lists in given board + 1
         //              or some arbitrary number, like 99999 so initialy it will always be last
+        */
         const newList = models.List.build(listData);
         await newList.save();
 

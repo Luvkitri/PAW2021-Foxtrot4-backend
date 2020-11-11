@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
                 model: models.User,
                 as: 'UsersInBoard',
                 where: {
-                    id: 1
+                    id: req.user.id
                 }
             }]
         });
@@ -81,7 +81,7 @@ router.post('/add', async (req, res) => {
         await newBoard.save();
 
         let relationData = {
-            user_id: 1,
+            user_id: req.user.id,
             board_id: newBoard.id,
             read: true,
             write: true,
@@ -98,7 +98,7 @@ router.post('/add', async (req, res) => {
     }
 });
 
-// @desc Archive a board
+// @desc Archive board
 // @route POST /boards/archive
 router.post('/archive', async (req, res) => {
     //TODO: check if user has acces to perform operation

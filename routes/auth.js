@@ -46,11 +46,10 @@ router.post('/register', async (req, res) => {
 // @desc    Add user
 // @route   POST /auth/get_user_info
 router.get('/get', authenticateToken, async (req, res) => {
-    console.log("sssad");
     try {
         const user = await models.User.findOne({
             where: {
-                login: req.user.user.login
+                login: req.user.login
             }
         });
         res.json(user);
@@ -71,10 +70,7 @@ router.post('/token', (req, res) => {
     }
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
         if (err) return res.sendStatus(403)
-        console.log(user)
-        const accessToken = generateAccessToken({
-            user: user.user
-        })
+        const accessToken = generateAccessToken(user)
         res.json({
             accessToken: accessToken
         });
@@ -98,12 +94,8 @@ router.post('/login', async (req, res) => {
         });
 
         if (await bcrypt.compare(req.body.password, user.password)) {
-            const accessToken = generateAccessToken({
-                user: user
-            });
-            const refreshToken = jwt.sign({
-                user: user
-            }, process.env.REFRESH_TOKEN_SECRET)
+            const accessToken = generateAccessToken(user.dataValues);
+            const refreshToken = jwt.sign(user.dataValues, process.env.REFRESH_TOKEN_SECRET)
             refreshTokens.push(refreshToken);
             res.status(200).json({
                 accessToken: accessToken,
