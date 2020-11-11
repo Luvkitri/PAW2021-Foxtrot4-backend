@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const models = require('../models');
 const User = models.user;
+const bcrypt = require('bcrypt');
 
 let table = [];
 
@@ -28,7 +29,7 @@ router.get('/get', async (req, res) => {
 router.post('/put', async (req, res) => {
     try {
         let data = JSON.parse(JSON.stringify(req.body));
-
+       
         const newEntry = User.build(data);
         await newEntry.save();
 

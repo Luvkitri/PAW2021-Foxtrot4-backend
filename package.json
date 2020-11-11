@@ -5,7 +5,8 @@
     "main": "server.js",
     "scripts": {
         "start": "node server",
-        "dev": "nodemon server"
+        "dev": "nodemon server",
+        "rebuild-db" : "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate"
     },
     "repository": {
         "type": "git",
@@ -18,9 +19,11 @@
     },
     "homepage": "https://github.com/Luvkitri/PAW2021-Foxtrot4-backend#readme",
     "dependencies": {
+        "bcrypt": "^5.0.0",
         "cors": "^2.8.5",
         "dotenv": "^8.2.0",
         "express": "^4.17.1",
+        "jsonwebtoken": "^8.5.1",
         "morgan": "^1.10.0",
         "nodemon": "^2.0.5",
         "pg": "^8.4.1",
