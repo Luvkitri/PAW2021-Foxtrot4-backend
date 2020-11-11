@@ -18,6 +18,7 @@ let app = express();
 app.use(express.json());
 app.use(cors());
 
+app.options('*', cors());
 
 // Logging
 if (process.env.NODE_ENV === 'development') {
@@ -36,7 +37,7 @@ app.use('/boards', authenticateToken, require('./routes/boards'));
 // Server start
 //const port = process.env.PORT;
 
-const port = 5000;
+const port = 80;
 
 let server = app.listen(port, () => {
     let host = server.address().address;
