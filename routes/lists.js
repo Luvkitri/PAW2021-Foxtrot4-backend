@@ -7,6 +7,11 @@ const models = require('../models');
 // @route GET /boards/:boardId/lists
 router.get('/', async (req, res) => {
     try {
+        // Check if parm boardId exists
+        if (!req.boardId) {
+            res.status(404).send({ error: "Board id was not provided" });
+        }
+
         const results = await models.List.findAll({
             raw: true,
             include: [{
@@ -32,8 +37,9 @@ router.get('/', async (req, res) => {
 
         res.status(200).json(lists);
     } catch (error) {
-        console.error(error.message);
-        res.status(500).send(error.message);
+        res.status(500).send({
+            error: error.message
+        });
     }
 });
 
@@ -41,14 +47,31 @@ router.get('/', async (req, res) => {
 // @route GET /boards/:boardId/lists/:listId
 router.get('/:listId', async (req, res) => {
     try {
-        const results = await models.List.findByPk(req.params.listId);
+        const userId = req.user.id;
+        const list = await models.List.findByPk(req.params.listId, { raw: true });
 
-        let list = {
-            id: results.id,
-            list_name: results.list_name,
-            position: results.position,
-            archived: results.archived,
-            board_id: results.board_id
+        // Check if list exists
+        if (!list) {
+            res.status(404).send({ error: "List does not exist" });
+        }
+
+        const results = await models.Board.findOne({
+            raw: true,
+            where: {
+                id: list.board_id
+            },
+            include: [{
+                model: models.User,
+                as: 'UsersInBoard',
+                where: {
+                    id: userId
+                }
+            }]
+        });
+
+        // Check if user has the board, to access the list
+        if (!results) {
+            res.status(403).send({ error: "No access to this list" });
         }
 
         res.status(200).json(list);
@@ -62,9 +85,50 @@ router.get('/:listId', async (req, res) => {
 // @route DELETE /boards/:boardId/lists/:listId
 router.delete('/:listId', async (req, res) => {
     try {
+        const userId = req.user.id;
+        const listId = req.params.listId;
+        let boardId;
+
+        if (!req.boardId) {
+            const list = await models.List.findByPk(listId, { raw: true });
+            
+            // Check if list exists
+            if (!list) {
+                res.status(404).send({ error: "List does not exist" });
+            }
+
+            boardId = list.board_id;
+        } else {
+            boardId = req.boardId
+        }
+
+        const results = await models.Board.findOne({
+            raw: true,
+            where: {
+                id: boardId
+            },
+            include: [{
+                model: models.User,
+                as: 'UsersInBoard',
+                where: {
+                    id: userId
+                }
+            }]
+        });
+
+        // Check if user has the board, to access the list
+        if (!results) {
+            res.status(403).send({ error: "No access to this list" });
+        }
+
+        // Check if user has rights to edit this board
+        if (!results['UsersInBoard.UserBoardRelation.write']) {
+            res.status(403).send({ error: "User doesn't have rights to edit this board" });
+        }
+
         await models.List.destroy({
             where: {
-                id: req.params.listId
+                id: listId
             }
         });
 
@@ -82,16 +146,52 @@ router.delete('/:listId', async (req, res) => {
 // @route POST /boards/:boardId/lists/add
 router.post('/add', async (req, res) => {
     try {
+        const userId = req.user.id;
         const listData = req.body;
+
         // if board_id not specified in request body, but given in url
         if (!listData.board_id && req.boardId) {
             listData.board_id = req.boardId;
         }
 
-        /**  TODO: automatic listData.position if not specified, 
-        //              equal to number of lists in given board + 1
-        //              or some arbitrary number, like 99999 so initialy it will always be last
-        */
+        const results = await models.Board.findOne({
+            raw: true,
+            where: {
+                id: listData.board_id
+            },
+            include: [{
+                model: models.User,
+                as: 'UsersInBoard',
+                where: {
+                    id: userId
+                }
+            }]
+        });
+
+        // Check if user has the board, to access the list
+        if (!results) {
+            res.status(403).send({ error: "No access to this board" });
+        }
+
+        // Check if user has rights to post to this board
+        if (!results['UsersInBoard.UserBoardRelation.write']) {
+            res.status(403).send({ error: "User doesn't have rights to edit this board" });
+        }
+
+        const lists = await models.List.findAll({
+            raw: true,
+            include: [{
+                model: models.Board,
+                where: {
+                    id: listData.board_id
+                }
+            }]
+        });
+
+        if (!listData.position) {
+            listData.position = lists.length + 1;
+        }
+
         const newList = models.List.build(listData);
         await newList.save();
 
@@ -102,56 +202,66 @@ router.post('/add', async (req, res) => {
     }
 });
 
-// @desc Archive list by Id
-// @route POST /boards/:boardId/lists/archive
-router.post('/archive', async (req, res) => {
+// @desc Update list by id
+// @route PUT /lists/:listId
+router.put('/:listId', async (req, res) => {
     try {
-        let listId = req.body.id;
+        const userId = req.user.id;
+        const listId = req.params.listId;
+        let boardId;
 
-        await models.List.update({
-            archived: true
-        }, {
+        if (!req.boardId) {
+            const list = await models.List.findByPk(listId, { raw: true });
+            
+            // Check if list exists
+            if (!list) {
+                res.status(404).send({ error: "List does not exist" });
+            }
+
+            boardId = list.board_id;
+        } else {
+            boardId = req.boardId
+        }
+
+        const results = await models.Board.findOne({
+            raw: true,
+            where: {
+                id: boardId
+            },
+            include: [{
+                model: models.User,
+                as: 'UsersInBoard',
+                where: {
+                    id: userId
+                }
+            }]
+        });
+
+        // Check if user has the board, to access the list
+        if (!results) {
+            res.status(403).send({ error: "No access to this board" });
+        }
+
+        // Check if user has rights to post to this board
+        if (!results['UsersInBoard.UserBoardRelation.write']) {
+            res.status(403).send({ error: "User doesn't have rights to edit this board" });
+        }
+
+        const updateObject = _.omitBy(req.body, _.isNil);
+
+        await models.List.update(
+            updateObject, {
             where: {
                 id: listId
             }
         });
 
-        //(maybe) TODO: check number of affected rows, in case of invalid id
-
-        //(maybe) TODO: return changed list object
-        res.status(200).send({
-            result: true
-        });
+        const updatedList = await models.newList.findByPk(listId, { raw: true });
+        res.status(200).json(updatedList);
     } catch (error) {
-        console.error(error.message);
-        res.status(500).send(error.message);
-    }
-});
-
-// @desc Restore archived list
-// @route POST /boards/:boardId/lists/restore
-router.post('/restore', async (req, res) => {
-    try {
-        let listId = req.body.id;
-
-        await models.List.update({
-            archived: false
-        }, {
-            where: {
-                id: listId
-            }
+        res.status(500).send({
+            error: error.message
         });
-
-        //(maybe) TODO: check number of affected rows, in case of invalid id
-
-        //(maybe) TODO: return changed list object
-
-        res.status(200).send({
-            result: true
-        });
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).send(error.message);
     }
 });
 
