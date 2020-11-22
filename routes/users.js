@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const models = require('../models');
 const bcrypt = require('bcrypt');
-var _ = require('lodash');
+const _ = require('lodash');
 
 // @desc get user info by id
 // @route GET /users/

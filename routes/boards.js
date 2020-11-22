@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const lists = require('./lists');
 const models = require('../models');
+const { result } = require('lodash');
+const _ = require('lodash');
 
 // @desc Get all the boards
 // @route GET /boards/
@@ -69,7 +71,59 @@ router.delete('/:boardId', async (req, res) => {
         console.error(error.message);
         res.status(500).send(error.message);
     }
-})
+});
+
+// @desc Update board by id
+// @route PUT /boards/:boardId
+router.put('/:boardId', async (req, res) => {
+    try {
+        let userId = req.user.id;
+        let boardId = req.params.boardId;
+
+        console.log(userId);
+        console.log(boardId);
+
+        const results = await models.Board.findOne({
+            raw: true,
+            where: {
+                id: boardId
+            },
+            include: [{
+                model: models.User,
+                as: 'UsersInBoard',
+                where: {
+                    id: userId
+                }
+            }]
+        });
+
+        // Check if user has this board
+        if (!results) {
+            res.status(403).send({ error: "User doesn't have rights for that board" });
+        }
+
+        // Check if user has rights to update this board
+        if (!results['UsersInBoard.UserBoardRelation.execute']) {
+            res.status(403).send({ error: "User doesn't have rights to update this board" });
+        }
+
+        let updateObject = _.omitBy(req.body, _.isNil);
+
+        await models.Board.update(
+            updateObject, {
+            where: {
+                id: boardId
+            }
+        });
+
+        let updatedBoard = await models.Board.findByPk(boardId, { raw: true });
+        res.status(200).send(updatedBoard);
+    } catch (error) {
+        res.status(500).send({
+            error: error.message
+        });
+    }
+});
 
 // @desc Add new board
 // @route POST /boards/add
