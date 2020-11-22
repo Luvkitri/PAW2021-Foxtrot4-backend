@@ -35,6 +35,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        color: {
+            type: DataTypes.INTEGER
+        },
         archived: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

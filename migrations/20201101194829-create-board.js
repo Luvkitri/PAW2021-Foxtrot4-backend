@@ -27,6 +27,9 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false
             },
+            color: {
+                type: Sequelize.INTEGER
+            },
             archived: {
                 type: Sequelize.BOOLEAN,
                 allowNull: false,
