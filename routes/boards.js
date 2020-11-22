@@ -9,16 +9,23 @@ const _ = require('lodash');
 // @route GET /boards/
 router.get('/', async (req, res) => {
     try {
+        let userId = req.user.id;
+        
         const results = await models.Board.findAll({
             raw: true,
             include: [{
                 model: models.User,
                 as: 'UsersInBoard',
                 where: {
-                    id: req.user.id
+                    id: userId
                 }
             }]
         });
+
+        // Check if user has any boards
+        if (!results) {
+            res.status(404).send({ error: "No boards found" });
+        }
 
         let boards = [];
 
@@ -29,7 +36,6 @@ router.get('/', async (req, res) => {
                 last_open: result.last_open,
                 visibility: result.visibility,
                 archived: result.archived,
-                read: result['UsersInBoard.UserBoardRelation.read'],
                 write: result['UsersInBoard.UserBoardRelation.write'],
                 execute: result['UsersInBoard.UserBoardRelation.execute']
             }
@@ -48,40 +54,8 @@ router.get('/', async (req, res) => {
 // @route GET /boards/:boardId
 router.get('/:boardId', async (req, res) => {
     try {
-        const results = await models.Board.findByPk(req.params.boardId);
-        res.status(200).json(results.dataValues);
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).send(error.message);
-    }
-});
-
-// @desc Delete board by id
-// @route DELETE /boards/:boardId
-router.delete('/:boardId', async (req, res) => {
-    try {
-        await models.Board.destroy({
-            where: {
-                id: req.params.boardId
-            }
-        });
-
-        res.status(200).send({ result: true });
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).send(error.message);
-    }
-});
-
-// @desc Update board by id
-// @route PUT /boards/:boardId
-router.put('/:boardId', async (req, res) => {
-    try {
         let userId = req.user.id;
         let boardId = req.params.boardId;
-
-        console.log(userId);
-        console.log(boardId);
 
         const results = await models.Board.findOne({
             raw: true,
@@ -99,7 +73,98 @@ router.put('/:boardId', async (req, res) => {
 
         // Check if user has this board
         if (!results) {
-            res.status(403).send({ error: "User doesn't have rights for that board" });
+            res.status(404).send({ error: "Board does not exist" });
+        }
+
+        const board = {
+            id: results.id,
+            board_name: results.board_name,
+            last_open: results.last_open,
+            visibility: results.visibility,
+            archived: results.archived,
+            write: results['UsersInBoard.UserBoardRelation.write'],
+            execute: results['UsersInBoard.UserBoardRelation.execute']
+        }
+
+        res.status(200).json(board);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send(error.message);
+    }
+});
+
+// @desc Delete board by id
+// @route DELETE /boards/:boardId
+router.delete('/:boardId', async (req, res) => {
+    try {
+        let userId = req.user.id;
+        let boardId = req.params.boardId;
+
+        const results = await models.Board.findOne({
+            raw: true,
+            where: {
+                id: boardId
+            },
+            include: [{
+                model: models.User,
+                as: 'UsersInBoard',
+                where: {
+                    id: userId
+                }
+            }]
+        });
+
+        // Check if user has this board
+        if (!results) {
+            res.status(404).send({ error: "Board does not exist" });
+        }
+
+        // Check if user has rights to update this board
+        if (!results['UsersInBoard.UserBoardRelation.execute']) {
+            res.status(403).send({ error: "User doesn't have rights to delete this board" });
+        }
+
+        const result = await models.Board.destroy({
+            where: {
+                id: boardId
+            }
+        });
+
+        if (result == 0) {
+            res.status(404).send({ error: "There is no board_with that id" });
+        }
+
+        res.status(200).send({ result: true });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send(error.message);
+    }
+});
+
+// @desc Update board by id
+// @route PUT /boards/:boardId
+router.put('/:boardId', async (req, res) => {
+    try {
+        let userId = req.user.id;
+        let boardId = req.params.boardId;
+
+        const results = await models.Board.findOne({
+            raw: true,
+            where: {
+                id: boardId
+            },
+            include: [{
+                model: models.User,
+                as: 'UsersInBoard',
+                where: {
+                    id: userId
+                }
+            }]
+        });
+
+        // Check if user has this board
+        if (!results) {
+            res.status(404).send({ error: "Board does not exist" });
         }
 
         // Check if user has rights to update this board
@@ -117,7 +182,7 @@ router.put('/:boardId', async (req, res) => {
         });
 
         let updatedBoard = await models.Board.findByPk(boardId, { raw: true });
-        res.status(200).send(updatedBoard);
+        res.status(200).json(updatedBoard);
     } catch (error) {
         res.status(500).send({
             error: error.message
@@ -137,7 +202,6 @@ router.post('/add', async (req, res) => {
         let relationData = {
             user_id: req.user.id,
             board_id: newBoard.id,
-            read: true,
             write: true,
             execute: true
         }
@@ -151,53 +215,6 @@ router.post('/add', async (req, res) => {
         res.status(500).send(error.message);
     }
 });
-
-// @desc Archive board
-// @route POST /boards/archive
-router.post('/archive', async (req, res) => {
-    //TODO: check if user has acces to perform operation
-    try {
-        let boardId = req.body.id;
-
-        await models.Board.update({
-            archived: true
-        }, {
-            where: {
-                id: boardId
-            }
-        });
-
-        res.status(200).send({ result: true });
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).send(error.message);
-    }
-});
-
-// @desc Restore a board from archived state
-// @route POST /boards/restore
-router.post('/restore', async (req, res) => {
-    //TODO: check if user has acces to perform operation
-    try {
-        let boardId = req.body.id;
-
-        await models.Board.update({
-            archived: false
-        }, {
-            where: {
-                id: boardId
-            }
-        });
-
-        res.status(200).send({ result: true });
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).send(error.message);
-    }
-})
-
-
-
 
 router.use('/:boardId/lists', (req, res, next) => {
     req.boardId = req.params.boardId;
