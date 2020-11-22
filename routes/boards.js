@@ -127,15 +127,16 @@ router.delete('/:boardId', async (req, res) => {
             res.status(403).send({ error: "User doesn't have rights to delete this board" });
         }
 
+        // Check if board has been archived befor deleting
+        if (!results.archived) {
+            res.status(405).send({ error: "This board cannot be deleted, it hasn't been archived" });
+        }
+
         const result = await models.Board.destroy({
             where: {
                 id: boardId
             }
         });
-
-        if (result == 0) {
-            res.status(404).send({ error: "There is no board_with that id" });
-        }
 
         res.status(200).send({ result: true });
     } catch (error) {
