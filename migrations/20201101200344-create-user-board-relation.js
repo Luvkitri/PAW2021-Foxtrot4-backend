@@ -31,10 +31,6 @@ module.exports = {
                 },
                 onDelete: 'cascade'
             },
-            read: {
-                type: Sequelize.BOOLEAN,
-                allowNull: false
-            },
             write: {
                 type: Sequelize.BOOLEAN,
                 allowNull: false
