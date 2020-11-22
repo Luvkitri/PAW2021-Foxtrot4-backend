@@ -37,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'board_id'
             }
         },
+        read: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false
+        },
         write: { 
             type: DataTypes.BOOLEAN,
             allowNull: false
