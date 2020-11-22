@@ -2,14 +2,13 @@ const express = require('express');
 const router = express.Router();
 const lists = require('./lists');
 const models = require('../models');
-const { result } = require('lodash');
 const _ = require('lodash');
 
 // @desc Get all the boards
 // @route GET /boards/
 router.get('/', async (req, res) => {
     try {
-        let userId = req.user.id;
+        const userId = req.user.id;
         
         const results = await models.Board.findAll({
             raw: true,
@@ -46,8 +45,9 @@ router.get('/', async (req, res) => {
 
         res.status(200).json(boards);
     } catch (error) {
-        console.error(error.message);
-        res.status(500).send(error.message);
+        res.status(500).send({
+            error: error.message
+        });
     }
 });
 
@@ -55,8 +55,8 @@ router.get('/', async (req, res) => {
 // @route GET /boards/:boardId
 router.get('/:boardId', async (req, res) => {
     try {
-        let userId = req.user.id;
-        let boardId = req.params.boardId;
+        const userId = req.user.id;
+        const boardId = req.params.boardId;
 
         const results = await models.Board.findOne({
             raw: true,
@@ -90,8 +90,9 @@ router.get('/:boardId', async (req, res) => {
 
         res.status(200).json(board);
     } catch (error) {
-        console.error(error.message);
-        res.status(500).send(error.message);
+        res.status(500).send({
+            error: error.message
+        });
     }
 });
 
@@ -99,8 +100,8 @@ router.get('/:boardId', async (req, res) => {
 // @route DELETE /boards/:boardId
 router.delete('/:boardId', async (req, res) => {
     try {
-        let userId = req.user.id;
-        let boardId = req.params.boardId;
+        const userId = req.user.id;
+        const boardId = req.params.boardId;
 
         const results = await models.Board.findOne({
             raw: true,
@@ -138,8 +139,9 @@ router.delete('/:boardId', async (req, res) => {
 
         res.status(200).send({ result: true });
     } catch (error) {
-        console.error(error.message);
-        res.status(500).send(error.message);
+        res.status(500).send({
+            error: error.message
+        });
     }
 });
 
@@ -147,8 +149,8 @@ router.delete('/:boardId', async (req, res) => {
 // @route PUT /boards/:boardId
 router.put('/:boardId', async (req, res) => {
     try {
-        let userId = req.user.id;
-        let boardId = req.params.boardId;
+        const userId = req.user.id;
+        const boardId = req.params.boardId;
 
         const results = await models.Board.findOne({
             raw: true,
@@ -174,7 +176,7 @@ router.put('/:boardId', async (req, res) => {
             res.status(403).send({ error: "User doesn't have rights to update this board" });
         }
 
-        let updateObject = _.omitBy(req.body, _.isNil);
+        const updateObject = _.omitBy(req.body, _.isNil);
 
         await models.Board.update(
             updateObject, {
@@ -183,7 +185,7 @@ router.put('/:boardId', async (req, res) => {
             }
         });
 
-        let updatedBoard = await models.Board.findByPk(boardId, { raw: true });
+        const updatedBoard = await models.Board.findByPk(boardId, { raw: true });
         res.status(200).json(updatedBoard);
     } catch (error) {
         res.status(500).send({
@@ -196,7 +198,7 @@ router.put('/:boardId', async (req, res) => {
 // @route POST /boards/add
 router.post('/add', async (req, res) => {
     try {
-        let boardData = req.body;
+        const boardData = req.body;
 
         const newBoard = models.Board.build(boardData);
         await newBoard.save();
@@ -213,8 +215,9 @@ router.post('/add', async (req, res) => {
 
         res.status(201).json(newBoard);
     } catch (error) {
-        console.error(error.message);
-        res.status(500).send(error.message);
+        res.status(500).send({
+            error: error.message
+        });
     }
 });
 
