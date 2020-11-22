@@ -32,8 +32,12 @@ app.all('/*', (req, res, next) => {
 });
 
 app.use('/auth', require('./routes/auth'));
-app.use('/boards', authenticateToken, require('./routes/boards'));
 app.use('/users', authenticateToken, require('./routes/users'));
+app.use('/boards', authenticateToken, require('./routes/boards'));
+app.use('/lists', authenticateToken, require('./routes/lists'));
+app.use('/cards', authenticateToken, require('./routes/cards'));
+
+
 
 // Server start
 const port = process.env.PORT;
