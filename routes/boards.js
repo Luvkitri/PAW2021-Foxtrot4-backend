@@ -9,7 +9,7 @@ const _ = require('lodash');
 router.get('/', async (req, res) => {
     try {
         const userId = req.user.id;
-        
+
         const results = await models.Board.findAll({
             raw: true,
             include: [{
@@ -23,7 +23,9 @@ router.get('/', async (req, res) => {
 
         // Check if user has any boards
         if (!results) {
-            res.status(404).send({ error: "No boards found" });
+            res.status(404).send({
+                error: "No boards found"
+            });
         }
 
         let boards = [];
@@ -74,7 +76,9 @@ router.get('/:boardId', async (req, res) => {
 
         // Check if user has this board
         if (!results) {
-            res.status(404).send({ error: "Board does not exist" });
+            res.status(404).send({
+                error: "Board does not exist"
+            });
         }
 
         const board = {
@@ -119,17 +123,23 @@ router.delete('/:boardId', async (req, res) => {
 
         // Check if user has this board
         if (!results) {
-            res.status(404).send({ error: "Board does not exist" });
+            res.status(404).send({
+                error: "Board does not exist"
+            });
         }
 
         // Check if user has rights to update this board
         if (!results['UsersInBoard.UserBoardRelation.execute']) {
-            res.status(403).send({ error: "User doesn't have rights to delete this board" });
+            res.status(403).send({
+                error: "User doesn't have rights to delete this board"
+            });
         }
 
         // Check if board has been archived befor deleting
         if (!results.archived) {
-            res.status(405).send({ error: "This board cannot be deleted, it hasn't been archived" });
+            res.status(405).send({
+                error: "This board cannot be deleted, it hasn't been archived"
+            });
         }
 
         const result = await models.Board.destroy({
@@ -138,7 +148,9 @@ router.delete('/:boardId', async (req, res) => {
             }
         });
 
-        res.status(200).send({ result: true });
+        res.status(200).send({
+            result: true
+        });
     } catch (error) {
         res.status(500).send({
             error: error.message
@@ -169,24 +181,30 @@ router.put('/:boardId', async (req, res) => {
 
         // Check if user has this board
         if (!results) {
-            res.status(404).send({ error: "Board does not exist" });
+            res.status(404).send({
+                error: "Board does not exist"
+            });
         }
 
         // Check if user has rights to update this board
         if (!results['UsersInBoard.UserBoardRelation.execute']) {
-            res.status(403).send({ error: "User doesn't have rights to update this board" });
+            res.status(403).send({
+                error: "User doesn't have rights to update this board"
+            });
         }
 
         const updateObject = _.omitBy(req.body, _.isNil);
 
         await models.Board.update(
             updateObject, {
-            where: {
-                id: boardId
-            }
-        });
+                where: {
+                    id: boardId
+                }
+            });
 
-        const updatedBoard = await models.Board.findByPk(boardId, { raw: true });
+        const updatedBoard = await models.Board.findByPk(boardId, {
+            raw: true
+        });
         res.status(200).json(updatedBoard);
     } catch (error) {
         res.status(500).send({
@@ -207,6 +225,7 @@ router.post('/add', async (req, res) => {
         let relationData = {
             user_id: req.user.id,
             board_id: newBoard.id,
+            read: true,
             write: true,
             execute: true
         }

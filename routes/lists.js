@@ -9,7 +9,9 @@ router.get('/', async (req, res) => {
     try {
         // Check if parm boardId exists
         if (!req.boardId) {
-            res.status(404).send({ error: "Board id was not provided" });
+            res.status(404).send({
+                error: "Board id was not provided"
+            });
         }
 
         const userId = req.user.id;
@@ -28,12 +30,16 @@ router.get('/', async (req, res) => {
 
         // Chcek if board exists
         if (!board) {
-            res.status(404).send({ error: "Board does not exist" });
+            res.status(404).send({
+                error: "Board does not exist"
+            });
         }
 
         // Check if user has permission to access this board
         if (!board['Board.UsersInBoard.UserBoardRelation.read']) {
-            res.status(403).send({ error: "No access to this board" });
+            res.status(403).send({
+                error: "No access to this board"
+            });
         }
 
         const results = await models.List.findAll({
@@ -91,12 +97,16 @@ router.get('/:listId', async (req, res) => {
 
         // Check if list exists
         if (!results) {
-            res.status(404).send({ error: "List does not exist" });
+            res.status(404).send({
+                error: "List does not exist"
+            });
         }
 
         // Check if user has permission to access this board
         if (!results['Board.UsersInBoard.UserBoardRelation.read']) {
-            res.status(403).send({ error: "No access to this board" });
+            res.status(403).send({
+                error: "No access to this board"
+            });
         }
 
         const list = {
@@ -138,22 +148,30 @@ router.delete('/:listId', async (req, res) => {
 
         // Check if list exists
         if (!results) {
-            res.status(404).send({ error: "List does not exist" });
+            res.status(404).send({
+                error: "List does not exist"
+            });
         }
 
         // Check if user has permission to access this board
         if (!results['Board.UsersInBoard.UserBoardRelation.read']) {
-            res.status(403).send({ error: "No access to this board" });
+            res.status(403).send({
+                error: "No access to this board"
+            });
         }
 
         // Check if user has rights to edit this board
         if (!results['UsersInBoard.UserBoardRelation.write']) {
-            res.status(403).send({ error: "User doesn't have rights to edit this board" });
+            res.status(403).send({
+                error: "User doesn't have rights to edit this board"
+            });
         }
 
         // Check if list has been archived befor deleting
         if (!results.archived) {
-            res.status(405).send({ error: "This list cannot be deleted, it hasn't been archived" });
+            res.status(405).send({
+                error: "This list cannot be deleted, it hasn't been archived"
+            });
         }
 
         await models.List.destroy({
@@ -183,7 +201,9 @@ router.post('/add', async (req, res) => {
         if (!listData.board_id && req.boardId) {
             listData.board_id = req.boardId;
         } else if (!listData.board_id && !req.boardId) {
-            res.status(404).send({ error: "Board id was not provided" });
+            res.status(404).send({
+                error: "Board id was not provided"
+            });
         }
 
         const results = await models.Board.findByPk(listData.board_id, {
@@ -199,17 +219,26 @@ router.post('/add', async (req, res) => {
 
         // Chcek if board exists
         if (!results) {
-            res.status(404).send({ error: "Board does not exist" });
+            res.status(404).send({
+                error: "Board does not exist"
+            });
+            return;
         }
 
         // Check if user has permission to access this board
         if (!results['Board.UsersInBoard.UserBoardRelation.read']) {
-            res.status(403).send({ error: "No access to this board" });
+            res.status(403).send({
+                error: "No access to this board"
+            });
+            return;
         }
 
         // Check if user has rights to edit this board
         if (!results['UsersInBoard.UserBoardRelation.write']) {
-            res.status(403).send({ error: "User doesn't have rights to edit this board" });
+            res.status(403).send({
+                error: "User doesn't have rights to edit this board"
+            });
+            return;
         }
 
         const lists = await models.List.findAll({
@@ -260,29 +289,37 @@ router.put('/:listId', async (req, res) => {
 
         // Check if list exists
         if (!results) {
-            res.status(404).send({ error: "List does not exist" });
+            res.status(404).send({
+                error: "List does not exist"
+            });
         }
 
         // Check if user has permission to access this board
         if (!results['Board.UsersInBoard.UserBoardRelation.read']) {
-            res.status(403).send({ error: "No access to this board" });
+            res.status(403).send({
+                error: "No access to this board"
+            });
         }
 
         // Check if user has rights to edit this board
         if (!results['UsersInBoard.UserBoardRelation.write']) {
-            res.status(403).send({ error: "User doesn't have rights to edit this board" });
+            res.status(403).send({
+                error: "User doesn't have rights to edit this board"
+            });
         }
 
         const updateObject = _.omitBy(req.body, _.isNil);
 
         await models.List.update(
             updateObject, {
-            where: {
-                id: listId
-            }
-        });
+                where: {
+                    id: listId
+                }
+            });
 
-        const updatedList = await models.newList.findByPk(listId, { raw: true });
+        const updatedList = await models.List.findByPk(listId, {
+            raw: true
+        });
         res.status(200).json(updatedList);
     } catch (error) {
         res.status(500).send({
