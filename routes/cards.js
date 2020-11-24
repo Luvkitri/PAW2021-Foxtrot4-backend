@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const models = require('../models');
+const _ = require('lodash');
 
 // @desc Get all the cards
 // @route GET /boards/:boardId/lists/:listId/cards
@@ -14,8 +15,8 @@ router.get('/', async (req, res) => {
         }
 
         const userId = req.user.id;
-        const boardId = req.boardId;
-        const listId = req.listId;
+        const boardId = Number(req.boardId);
+        const listId = Number(req.listId);
 
         const board = await models.Board.findByPk(boardId, {
             raw: true,
@@ -33,16 +34,18 @@ router.get('/', async (req, res) => {
             res.status(404).send({
                 error: "Board does not exist"
             });
+            return;
         }
 
         // Check if user has permission to access this board
-        if (!board['Board.UsersInBoard.UserBoardRelation.read']) {
+        if (!board['UsersInBoard.UserBoardRelation.read']) {
             res.status(403).send({
                 error: "No access to this board"
             });
+            return;
         }
 
-        const results = await models.Card.findAll({
+        const cards = await models.Card.findAll({
             raw: true,
             include: [{
                 model: models.List,
@@ -52,21 +55,21 @@ router.get('/', async (req, res) => {
             }]
         });
 
-        let cards = [];
 
-        results.forEach(result => {
-            let card = {
-                id: result.id,
-                card_name: result.card_name,
-                position: result.position,
-                content: result.content,
-                archived: result.archived
-            }
-
-            cards.push(card);
+        let cleanedCards = cards.map(c => {
+            return {
+                id: c.id,
+                card_name: c.card_name,
+                position: c.position,
+                content: c.content,
+                archived: c.archived,
+                list_id: c.list_id,
+            };
         });
 
-        res.status(200).json(cards);
+
+
+        res.status(200).json(cleanedCards);
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
@@ -78,9 +81,9 @@ router.get('/', async (req, res) => {
 router.get('/:cardId', async (req, res) => {
     try {
         const userId = req.user.id;
-        const cardId = req.params.cardId
+        const cardId = Number(req.params.cardId);
 
-        const results = await models.Card.findByPk(cardId, {
+        const cardWithParents = await models.Card.findByPk(cardId, {
             raw: true,
             include: [{
                 model: models.List,
@@ -100,31 +103,33 @@ router.get('/:cardId', async (req, res) => {
         });
 
         // Chcek if card exists
-        if (!results) {
+        if (!cardWithParents) {
             res.status(404).send({
                 error: "Card does not exist"
             });
+            return;
         }
 
         // Check if user has permission to access this board
-        if (!results['Board.UsersInBoard.UserBoardRelation.read']) {
+        if (!cardWithParents['Board.UsersInBoard.UserBoardRelation.read']) {
             res.status(403).send({
                 error: "No access to this board"
             });
+            return;
         }
 
-        const results2 = await models.Card.findByPk(req.params.cardId);
+        const card = await models.Card.findByPk(req.params.cardId);
 
-        let card = {
-            id: results2.id,
-            card_name: results2.card_name,
-            position: results2.position,
-            content: results2.content,
-            archived: results2.archived,
-            list_id: results2.list_id
+        let cleanedCard = {
+            id: card.id,
+            card_name: card.card_name,
+            position: card.position,
+            content: card.content,
+            archived: card.archived,
+            list_id: card.list_id
         }
 
-        res.status(200).json(card);
+        res.status(200).json(cleanedCard);
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
@@ -162,20 +167,23 @@ router.delete('/:cardId', async (req, res) => {
             res.status(404).send({
                 error: "Card does not exist"
             });
+            return;
         }
 
         // Check if user has permission to access this board
-        if (!results['Board.UsersInBoard.UserBoardRelation.read']) {
+        if (!results['List.Board.UsersInBoard.UserBoardRelation.read']) {
             res.status(403).send({
                 error: "No access to this board"
             });
+            return;
         }
 
         // Check if user has rights to edit this board
-        if (!results['UsersInBoard.UserBoardRelation.write']) {
+        if (!results['List.Board.UsersInBoard.UserBoardRelation.write']) {
             res.status(403).send({
                 error: "User doesn't have rights to edit this board"
             });
+            return;
         }
 
         // Check if card has been archived befor deleting
@@ -183,6 +191,7 @@ router.delete('/:cardId', async (req, res) => {
             res.status(405).send({
                 error: "This card cannot be deleted, it hasn't been archived"
             });
+            return;
         }
 
         await models.Card.destroy({
@@ -209,11 +218,12 @@ router.post('/add', async (req, res) => {
 
         // if board_id not specified in request body, but given in url
         if (!cardData.list_id && req.listId) {
-            cardData.list_id = req.listId;
+            cardData.list_id = Number(req.listId);
         } else if (!cardData.list_id && !req.listId) {
             res.status(404).send({
                 error: "Board id was not provided"
             });
+            return;
         }
 
         const results = await models.List.findByPk(cardData.list_id, {
@@ -236,6 +246,7 @@ router.post('/add', async (req, res) => {
             res.status(404).send({
                 error: "Card does not exist"
             });
+            return;
         }
 
         // Check if user has permission to access this board
@@ -243,13 +254,15 @@ router.post('/add', async (req, res) => {
             res.status(403).send({
                 error: "No access to this board"
             });
+            return;
         }
 
         // Check if user has rights to edit this board
-        if (!results['UsersInBoard.UserBoardRelation.write']) {
+        if (!results['Board.UsersInBoard.UserBoardRelation.write']) {
             res.status(403).send({
                 error: "User doesn't have rights to edit this board"
             });
+            return;
         }
 
         const cards = await models.Card.findAll({
@@ -281,9 +294,9 @@ router.post('/add', async (req, res) => {
 router.put('/:cardId', async (req, res) => {
     try {
         const userId = req.user.id;
-        const cardId = req.params.cardId;
+        const cardId = Number(req.params.cardId);
 
-        const results = await models.Card.findByPk(cardId, {
+        const cardWithParents = await models.Card.findByPk(cardId, {
             raw: true,
             include: [{
                 model: models.List,
@@ -303,24 +316,27 @@ router.put('/:cardId', async (req, res) => {
         });
 
         // Check if card exists
-        if (!results) {
+        if (!cardWithParents) {
             res.status(404).send({
                 error: "Card does not exist"
             });
+            return;
         }
 
         // Check if user has permission to access this board
-        if (!results['Board.UsersInBoard.UserBoardRelation.read']) {
+        if (!cardWithParents['List.Board.UsersInBoard.UserBoardRelation.read']) {
             res.status(403).send({
                 error: "No access to this board"
             });
+            return;
         }
 
         // Check if user has rights to edit this board
-        if (!results['UsersInBoard.UserBoardRelation.write']) {
+        if (!cardWithParents['List.Board.UsersInBoard.UserBoardRelation.write']) {
             res.status(403).send({
                 error: "User doesn't have rights to edit this board"
             });
+            return;
         }
 
         const updateObject = _.omitBy(req.body, _.isNil);

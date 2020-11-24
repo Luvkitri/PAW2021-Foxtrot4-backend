@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const cards = require('./cards');
 const models = require('../models');
+const _ = require('lodash');
 
 // @desc Get all the lists for current board 
 // @route GET /boards/:boardId/lists
@@ -15,7 +16,7 @@ router.get('/', async (req, res) => {
         }
 
         const userId = req.user.id;
-        const boardId = req.boardId;
+        const boardId = Number(req.boardId);
 
         const board = await models.Board.findByPk(boardId, {
             raw: true,
@@ -33,16 +34,18 @@ router.get('/', async (req, res) => {
             res.status(404).send({
                 error: "Board does not exist"
             });
+            return;
         }
 
         // Check if user has permission to access this board
-        if (!board['Board.UsersInBoard.UserBoardRelation.read']) {
+        if (!board['UsersInBoard.UserBoardRelation.read']) {
             res.status(403).send({
                 error: "No access to this board"
             });
+            return;
         }
 
-        const results = await models.List.findAll({
+        const lists = await models.List.findAll({
             raw: true,
             include: [{
                 model: models.Board,
@@ -52,20 +55,18 @@ router.get('/', async (req, res) => {
             }]
         });
 
-        let lists = []
 
-        results.forEach(result => {
-            let list = {
-                id: result.id,
-                list_name: result.list_name,
-                position: result.position,
-                archived: result.archived,
-            }
-
-            lists.push(list);
+        let cleanLists = lists.map(l => {
+            return {
+                id: l.id,
+                list_name: l.list_name,
+                position: l.position,
+                archived: l.archived,
+                board_id: l.board_id,
+            };
         });
 
-        res.status(200).json(lists);
+        res.status(200).json(cleanLists);
     } catch (error) {
         res.status(500).send({
             error: error.message
@@ -78,7 +79,7 @@ router.get('/', async (req, res) => {
 router.get('/:listId', async (req, res) => {
     try {
         const userId = req.user.id;
-        const listId = req.params.listId;
+        const listId = Number(req.params.listId);
 
         const results = await models.List.findByPk(listId, {
             raw: true,
@@ -100,6 +101,7 @@ router.get('/:listId', async (req, res) => {
             res.status(404).send({
                 error: "List does not exist"
             });
+            return;
         }
 
         // Check if user has permission to access this board
@@ -107,6 +109,7 @@ router.get('/:listId', async (req, res) => {
             res.status(403).send({
                 error: "No access to this board"
             });
+            return;
         }
 
         const list = {
@@ -199,7 +202,7 @@ router.post('/add', async (req, res) => {
 
         // if board_id not specified in request body, but given in url
         if (!listData.board_id && req.boardId) {
-            listData.board_id = req.boardId;
+            listData.board_id = Number(req.boardId);
         } else if (!listData.board_id && !req.boardId) {
             res.status(404).send({
                 error: "Board id was not provided"
@@ -226,7 +229,7 @@ router.post('/add', async (req, res) => {
         }
 
         // Check if user has permission to access this board
-        if (!results['Board.UsersInBoard.UserBoardRelation.read']) {
+        if (!results['UsersInBoard.UserBoardRelation.read']) {
             res.status(403).send({
                 error: "No access to this board"
             });
@@ -270,7 +273,7 @@ router.post('/add', async (req, res) => {
 router.put('/:listId', async (req, res) => {
     try {
         const userId = req.user.id;
-        const listId = req.params.listId;
+        const listId = Number(req.params.listId);
 
         const results = await models.List.findByPk(listId, {
             raw: true,
@@ -292,6 +295,7 @@ router.put('/:listId', async (req, res) => {
             res.status(404).send({
                 error: "List does not exist"
             });
+            return;
         }
 
         // Check if user has permission to access this board
@@ -299,13 +303,15 @@ router.put('/:listId', async (req, res) => {
             res.status(403).send({
                 error: "No access to this board"
             });
+            return;
         }
 
         // Check if user has rights to edit this board
-        if (!results['UsersInBoard.UserBoardRelation.write']) {
+        if (!results['Board.UsersInBoard.UserBoardRelation.write']) {
             res.status(403).send({
                 error: "User doesn't have rights to edit this board"
             });
+            return;
         }
 
         const updateObject = _.omitBy(req.body, _.isNil);

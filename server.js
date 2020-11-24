@@ -27,7 +27,8 @@ if (process.env.NODE_ENV === 'development') {
 
 // Routes
 app.all('/*', (req, res, next) => {
-    console.log(`REQUEST, from ${req.ip}; path ${req.path} `);
+    let now = new Date();
+    console.log(`[${now.toISOString()}] [${req.method}] [IP=${req.ip}] [PATH="${req.path}"] `);
     next();
 });
 
