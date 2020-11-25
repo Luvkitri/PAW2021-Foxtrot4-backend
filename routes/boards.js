@@ -105,7 +105,7 @@ router.get('/:boardId', async (req, res) => {
 router.delete('/:boardId', async (req, res) => {
     try {
         const userId = req.user.id;
-        const boardId = req.params.boardId;
+        const boardId = Number(req.params.boardId);
 
         const results = await models.Board.findOne({
             raw: true,
@@ -126,6 +126,7 @@ router.delete('/:boardId', async (req, res) => {
             res.status(404).send({
                 error: "Board does not exist"
             });
+            return;
         }
 
         // Check if user has rights to update this board
@@ -133,6 +134,7 @@ router.delete('/:boardId', async (req, res) => {
             res.status(403).send({
                 error: "User doesn't have rights to delete this board"
             });
+            return;
         }
 
         // Check if board has been archived befor deleting
@@ -140,6 +142,7 @@ router.delete('/:boardId', async (req, res) => {
             res.status(405).send({
                 error: "This board cannot be deleted, it hasn't been archived"
             });
+            return;
         }
 
         const result = await models.Board.destroy({

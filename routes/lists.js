@@ -132,7 +132,7 @@ router.get('/:listId', async (req, res) => {
 router.delete('/:listId', async (req, res) => {
     try {
         const userId = req.user.id;
-        const listId = req.params.listId;
+        const listId = Number(req.params.listId);
 
         const results = await models.List.findByPk(listId, {
             raw: true,
@@ -154,6 +154,7 @@ router.delete('/:listId', async (req, res) => {
             res.status(404).send({
                 error: "List does not exist"
             });
+            return;
         }
 
         // Check if user has permission to access this board
@@ -161,13 +162,15 @@ router.delete('/:listId', async (req, res) => {
             res.status(403).send({
                 error: "No access to this board"
             });
+            return;
         }
 
         // Check if user has rights to edit this board
-        if (!results['UsersInBoard.UserBoardRelation.write']) {
+        if (!results['Board.UsersInBoard.UserBoardRelation.write']) {
             res.status(403).send({
                 error: "User doesn't have rights to edit this board"
             });
+            return;
         }
 
         // Check if list has been archived befor deleting
@@ -175,6 +178,7 @@ router.delete('/:listId', async (req, res) => {
             res.status(405).send({
                 error: "This list cannot be deleted, it hasn't been archived"
             });
+            return;
         }
 
         await models.List.destroy({
