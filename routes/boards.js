@@ -38,6 +38,7 @@ router.get('/', async (req, res) => {
                 visibility: result.visibility,
                 color: result.color,
                 archived: result.archived,
+                read: result['UsersInBoard.UserBoardRelation.read'],
                 write: result['UsersInBoard.UserBoardRelation.write'],
                 execute: result['UsersInBoard.UserBoardRelation.execute']
             }
@@ -88,6 +89,7 @@ router.get('/:boardId', async (req, res) => {
             visibility: results.visibility,
             color: results.color,
             archived: results.archived,
+            read: results['UsersInBoard.UserBoardRelation.read'],
             write: results['UsersInBoard.UserBoardRelation.write'],
             execute: results['UsersInBoard.UserBoardRelation.execute']
         }
