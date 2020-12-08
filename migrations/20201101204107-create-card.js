@@ -27,6 +27,15 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false
             },
+            labels: {
+                type: Sequelize.ARRAY(Sequelize.INTEGER)
+            },
+            due_date: {
+                type: Sequelize.DATE
+            },
+            completed: {
+                type: Sequelize.BOOLEAN
+            },
             archived: {
                 type: Sequelize.BOOLEAN,
                 allowNull: false,
