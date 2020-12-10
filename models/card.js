@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
         },
         labels: {
-            type: DataTypes.ARRAY(DataTypes.INTEGER)
+            type: DataTypes.STRING,
         },
         due_date: {
             type: DataTypes.DATE,

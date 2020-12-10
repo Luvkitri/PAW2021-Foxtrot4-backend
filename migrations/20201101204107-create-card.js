@@ -28,7 +28,7 @@ module.exports = {
                 allowNull: false
             },
             labels: {
-                type: Sequelize.ARRAY(Sequelize.INTEGER)
+                type: Sequelize.STRING,
             },
             due_date: {
                 type: Sequelize.DATE
