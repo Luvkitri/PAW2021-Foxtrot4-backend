@@ -64,7 +64,9 @@ router.get('/', async (req, res) => {
                 content: c.content,
                 archived: c.archived,
                 list_id: c.list_id,
-                labels: c.labels
+                labels: c.labels,
+                due_date: c.due_date,
+                completed: c.completed,
             };
         });
 
@@ -111,7 +113,7 @@ router.get('/:cardId', async (req, res) => {
             return;
         }
 
-      
+
 
         const card = await models.Card.findByPk(req.params.cardId);
 
@@ -122,9 +124,11 @@ router.get('/:cardId', async (req, res) => {
             content: card.content,
             archived: card.archived,
             list_id: card.list_id,
-            labels: card.labels
+            labels: card.labels,
+            due_date: card.due_date,
+            completed: card.completed,
         }
-        
+
         res.status(200).json(cleanedCard);
     } catch (error) {
         console.error(error.message);
@@ -212,7 +216,7 @@ router.post('/add', async (req, res) => {
         const userId = req.user.id;
         const cardData = req.body;
 
-        
+
         // if board_id not specified in request body, but given in url
         if (!cardData.list_id && req.listId) {
             cardData.list_id = Number(req.listId);
@@ -290,25 +294,26 @@ router.post('/add', async (req, res) => {
 router.put('/label', async (req, res, next) => {
     const card = await models.Card.findByPk(req.body.card_id)
     console.log()
-     // Chcek if card exists
-     if (!card) {
+    // Chcek if card exists
+    if (!card) {
         res.status(404).send({
             error: "Card does not exist"
         });
         return;
     }
-    card.update(
-        {labels: req.body.label},
-        {where : req.body.card_id}
-    ).then(function(rowsUpdated) {
-        res.status(200).json(rowsUpdated)
-      })
-      .catch(err =>{
-          res.status(500).send(err.message)
-      })
-          
-      
-     
+    card.update({
+            labels: req.body.label
+        }, {
+            where: req.body.card_id
+        }).then(function (rowsUpdated) {
+            res.status(200).json(rowsUpdated)
+        })
+        .catch(err => {
+            res.status(500).send(err.message)
+        })
+
+
+
 
 })
 // @desc Update card by id
