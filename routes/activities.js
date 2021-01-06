@@ -21,10 +21,19 @@ router.get('/board/:boardId', async (req, res) => {
         const results = await models.Activity.findAll({
             where: {
                 board_id: boardId
-            }
+            },
+            raw: true,
         });
-
-        res.status(200).json(results);
+        const users = await models.User.findAll();
+        let x = []
+        results.forEach((a) => {
+            let user = users.find(u => u.id === a.user_id);
+            
+            let temp = a;
+            temp.username = user.first_name + ' ' + user.last_name;
+            x.push(temp)
+        });
+        res.status(200).json(x);
     } catch (error) {
         console.error(error.message);
         res.status(500).send({
