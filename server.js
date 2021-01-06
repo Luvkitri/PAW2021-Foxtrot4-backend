@@ -38,6 +38,7 @@ app.use('/boards', authenticateToken, require('./routes/boards'));
 app.use('/lists', authenticateToken, require('./routes/lists'));
 app.use('/cards', authenticateToken, require('./routes/cards'));
 app.use('/comments', authenticateToken, require('./routes/comments'));
+app.use('/activities', authenticateToken, require('./routes/activities'));
 
 
 
