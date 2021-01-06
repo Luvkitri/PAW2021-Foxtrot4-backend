@@ -118,7 +118,7 @@ router.delete('/:boardId', async (req, res) => {
                 model: models.User,
                 as: 'UsersInBoard',
                 where: {
-                    id: userId
+                    id: 1
                 }
             }]
         });
@@ -150,7 +150,9 @@ router.delete('/:boardId', async (req, res) => {
         const result = await models.Board.destroy({
             where: {
                 id: boardId
-            }
+            },
+            truncate: true,
+            cascade: true
         });
 
         res.status(200).send({
