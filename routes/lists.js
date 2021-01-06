@@ -184,7 +184,9 @@ router.delete('/:listId', async (req, res) => {
         await models.List.destroy({
             where: {
                 id: listId
-            }
+            },
+            truncate: true,
+            cascade: true
         });
 
         res.status(200).send({

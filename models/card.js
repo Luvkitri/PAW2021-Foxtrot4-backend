@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             Card.belongsTo(models.List);
+            Card.hasMany(models.Comment, {
+                foreignKey: 'card_id',
+                onDelete: 'CASCADE'
+            });
         }
     };
 
@@ -23,6 +27,15 @@ module.exports = (sequelize, DataTypes) => {
         },
         content: {
             type: DataTypes.STRING,
+        },
+        labels: {
+            type: DataTypes.STRING,
+        },
+        due_date: {
+            type: DataTypes.DATE,
+        },
+        completed: {
+            type: DataTypes.BOOLEAN
         },
         archived: {
             type: DataTypes.BOOLEAN,

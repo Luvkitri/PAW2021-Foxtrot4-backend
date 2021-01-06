@@ -8,46 +8,40 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-        await queryInterface.createTable('card', {
+        await queryInterface.createTable('activity', {
             id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 autoIncrement: true,
                 primaryKey: true
             },
-            card_name: {
-                type: Sequelize.STRING,
-                allowNull: false
-            },
-            position: {
+            user_id: {
                 type: Sequelize.INTEGER,
                 allowNull: false
             },
-            content: {
-                type: Sequelize.STRING,
+            board_id: {
+                type: Sequelize.INTEGER,
                 allowNull: false
-            },
-            labels: {
-                type: Sequelize.STRING,
-            },
-            due_date: {
-                type: Sequelize.DATE
-            },
-            completed: {
-                type: Sequelize.BOOLEAN
-            },
-            archived: {
-                type: Sequelize.BOOLEAN,
-                allowNull: false,
-                defaultValue: false
             },
             list_id: {
                 type: Sequelize.INTEGER,
-                allowNull: false,
-                references: {
-                    model: 'list',
-                    key: 'id'
-                }
+                allowNull: true
+            },
+            card_id: {
+                type: Sequelize.INTEGER,
+                allowNull: true
+            },
+            comment_id: {
+                type: Sequelize.INTEGER,
+                allowNull: true
+            },
+            description: {
+                type: Sequelize.JSON,
+                allowNull: false
+            },
+            created_at: {
+                type: Sequelize.DATE,
+                allowNull: false
             }
         });
     },
@@ -59,6 +53,6 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
          */
-        await queryInterface.dropTable('card');
+        await queryInterface.dropTable('activity');
     }
 };

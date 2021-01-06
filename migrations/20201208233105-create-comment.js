@@ -8,44 +8,26 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-        await queryInterface.createTable('card', {
+        await queryInterface.createTable('comment', {
             id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 autoIncrement: true,
                 primaryKey: true
             },
-            card_name: {
-                type: Sequelize.STRING,
-                allowNull: false
-            },
-            position: {
-                type: Sequelize.INTEGER,
-                allowNull: false
-            },
             content: {
                 type: Sequelize.STRING,
                 allowNull: false
             },
-            labels: {
-                type: Sequelize.STRING,
+            posted_at: {
+                type: Sequelize.DATE,
+                allowNull: false
             },
-            due_date: {
-                type: Sequelize.DATE
-            },
-            completed: {
-                type: Sequelize.BOOLEAN
-            },
-            archived: {
-                type: Sequelize.BOOLEAN,
-                allowNull: false,
-                defaultValue: false
-            },
-            list_id: {
+            card_id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'list',
+                    model: 'card',
                     key: 'id'
                 }
             }
@@ -59,6 +41,6 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
          */
-        await queryInterface.dropTable('card');
+        await queryInterface.dropTable('comment');
     }
 };

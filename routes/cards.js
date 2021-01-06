@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const models = require('../models');
 const _ = require('lodash');
-
+const comments = require('./comments')
 // @desc Get all the cards
 // @route GET /boards/:boardId/lists/:listId/cards
 router.get('/', async (req, res) => {
@@ -64,6 +64,9 @@ router.get('/', async (req, res) => {
                 content: c.content,
                 archived: c.archived,
                 list_id: c.list_id,
+                labels: c.labels,
+                due_date: c.due_date,
+                completed: c.completed,
             };
         });
 
@@ -110,13 +113,7 @@ router.get('/:cardId', async (req, res) => {
             return;
         }
 
-        // Check if user has permission to access this board
-        if (!cardWithParents['Board.UsersInBoard.UserBoardRelation.read']) {
-            res.status(403).send({
-                error: "No access to this board"
-            });
-            return;
-        }
+
 
         const card = await models.Card.findByPk(req.params.cardId);
 
@@ -126,7 +123,10 @@ router.get('/:cardId', async (req, res) => {
             position: card.position,
             content: card.content,
             archived: card.archived,
-            list_id: card.list_id
+            list_id: card.list_id,
+            labels: card.labels,
+            due_date: card.due_date,
+            completed: card.completed,
         }
 
         res.status(200).json(cleanedCard);
@@ -197,7 +197,9 @@ router.delete('/:cardId', async (req, res) => {
         await models.Card.destroy({
             where: {
                 id: cardId
-            }
+            },
+            truncate: true,
+            cascade: true
         });
 
         res.status(200).send({
@@ -215,6 +217,7 @@ router.post('/add', async (req, res) => {
     try {
         const userId = req.user.id;
         const cardData = req.body;
+
 
         // if board_id not specified in request body, but given in url
         if (!cardData.list_id && req.listId) {
@@ -281,14 +284,40 @@ router.post('/add', async (req, res) => {
 
         const newCard = models.Card.build(cardData);
         await newCard.save();
-
+        console.log(cardData)
         res.status(201).json(newCard);
     } catch (error) {
         console.error(error.message);
         res.status(500).send(error.message);
     }
 });
+// @desc Add comment to card
+// @route POST /cards/label
+router.put('/label', async (req, res, next) => {
+    const card = await models.Card.findByPk(req.body.card_id)
+    console.log()
+    // Chcek if card exists
+    if (!card) {
+        res.status(404).send({
+            error: "Card does not exist"
+        });
+        return;
+    }
+    card.update({
+            labels: req.body.label
+        }, {
+            where: req.body.card_id
+        }).then(function (rowsUpdated) {
+            res.status(200).json(rowsUpdated)
+        })
+        .catch(err => {
+            res.status(500).send(err.message)
+        })
 
+
+
+
+})
 // @desc Update card by id
 // @route PUT /cards/:cardId
 router.put('/:cardId', async (req, res) => {
@@ -358,5 +387,10 @@ router.put('/:cardId', async (req, res) => {
         });
     }
 });
+
+router.use('/:cardId/comments', (req, res, next) => {
+    req.cardId = req.params.cardId;
+    next();
+}, comments);
 
 module.exports = router;
