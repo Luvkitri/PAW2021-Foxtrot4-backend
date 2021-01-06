@@ -118,7 +118,7 @@ router.delete('/:boardId', async (req, res) => {
                 model: models.User,
                 as: 'UsersInBoard',
                 where: {
-                    id: 1
+                    id: userId
                 }
             }]
         });

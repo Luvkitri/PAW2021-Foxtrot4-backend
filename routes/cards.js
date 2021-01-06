@@ -197,7 +197,9 @@ router.delete('/:cardId', async (req, res) => {
         await models.Card.destroy({
             where: {
                 id: cardId
-            }
+            },
+            truncate: true,
+            cascade: true
         });
 
         res.status(200).send({

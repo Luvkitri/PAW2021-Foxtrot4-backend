@@ -29,7 +29,7 @@ router.get('/board/:boardId', async (req, res) => {
         //const lists= await models.List.findAll();
         let x = [];
 
-        for(let i = 0; i < results.length; i++){
+        for (let i = 0; i < results.length; i++) {
 
             let a = results[i];
             let user = users.find(u => u.id === a.user_id);

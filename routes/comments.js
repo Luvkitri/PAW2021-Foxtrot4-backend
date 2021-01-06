@@ -6,7 +6,7 @@ const _ = require('lodash');
 // @desc Add comment to card
 // @route POST /cards/:cardId/comments/add
 router.post('/add', async (req, res) => {
-    
+
     const card = await models.Card.findByPk(req.cardId)
     // Chcek if card exists
     if (!card) {
@@ -16,21 +16,21 @@ router.post('/add', async (req, res) => {
         return;
     }
     let commentData = req.body
-    commentData.card_id=Number(req.cardId)
-    commentData.CardId=Number(req.cardId)
-    commentData.posted_at=new Date()
+    commentData.card_id = Number(req.cardId)
+    commentData.CardId = Number(req.cardId)
+    commentData.posted_at = new Date()
     console.log(commentData)
-    try{
-     
+    try {
+
         const newEntry = models.Comment.build(commentData);
         await newEntry.save();
         res.status(200).json(newEntry)
-    }catch (error) {
+    } catch (error) {
         console.error(error.message);
         res.status(500).json(error.message);
     }
-   
-  
+
+
 })
 
 // @desc Get card comments 
@@ -45,9 +45,9 @@ router.get('/get', async (req, res) => {
         return;
     }
     let commentData = req.body
-    commentData.card_id=req.cardId
-    commentData.posted_at=new Date()
-    try{
+    commentData.card_id = req.cardId
+    commentData.posted_at = new Date()
+    try {
         const comments = await models.Comment.findAll({
             raw: true,
             include: [{
@@ -66,12 +66,12 @@ router.get('/get', async (req, res) => {
         });
 
         res.status(200).json(cleanedComments)
-    }catch (error) {
+    } catch (error) {
         console.error(error.message);
         res.status(500).json(error.message);
     }
-   
-  
+
+
 })
 
 module.exports = router;
